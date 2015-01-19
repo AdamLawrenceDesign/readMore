@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Detect Double line</title>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>	<!-- JQuery Links -->
+	
+    <style>
+    	
+		div {
+			width:300px;
+			background:#fafafa;
+		}
+    	
+		.break-word {
+			word-wrap:break-word
+		}
+		
+    </style>
+    
+</head>
+
+<body>
+
+	<div>
+        <h1>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod. Consectetur adipiscing elit sed do eiusmod</h1>
+        <p>Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur. Qui in ea voluptate velit esse quam nihil molestiae consequatur.</p>
+    </div>
+	
+<script>
+
+$(function(){
+	
+	var el = {
+			$h1 : $('h1'),
+			$p : $('p'),
+		};
+	
+	var hideText = {	
+		
+		setValues : function set(obj, lineNo, multiline){
+			
+			var txt = obj.html();
+			var height = obj.height();
+			
+			this.val = [{
+				text : txt,
+				height : height,
+				lineNo : lineNo,
+				multiline : multiline,
+			}];
+			
+			this.findTarget(obj, txt);
+		
+		},
+		
+		findTarget : function target(obj, txt){
+			
+			var newTxt = txt.substring(0,1),
+				lines = '';
+				
+			for(var i= 0; i < hideText.val[0].lineNo; i++){
+				lines = lines + 'A<br/>';
+			}
+			
+			var targetHeight = obj.html(lines).height();
+			
+			if(targetHeight < hideText.val[0].height){
+				this.multi(obj,txt, newTxt, targetHeight);
+			} else {
+				obj.html(txt);
+				return;
+			}		
+		
+		},
+		
+		multi : function fn1(obj, txt, newTxt, targetHeight){
+			obj.addClass('break-word');
+
+			for(var i = 1; i < txt.length; i++){
+				newTxt = newTxt + txt.substring(i,i+1);
+				obj.html(newTxt);
+				
+				if(obj.height() > targetHeight){
+					var char = parseInt(obj.html().length)-16;
+					newTxt = txt.substring(0,char) + '... <a href="" class=\"readMore\" style="font-size:.8em">Read More</a>';
+					obj.html(newTxt);
+					obj.removeClass('break-word');
+					break;
+				}
+			}
+			this.readMore(obj,newTxt, targetHeight);
+		},
+		
+		readMore : function fn2(obj,newTxt, targetHeight){
+			
+			$('.readMore').on('click', function(event){
+				event.preventDefault();
+				obj.animate({
+					height:  hideText.val[0].height + targetHeight/hideText.val[0].lineNo
+				},400);
+				obj.html(hideText.val[0].text + ' <a href="" class=\"showLess\" style="font-size:.8em">show less</a>');
+				hideText.showLess(obj,newTxt, targetHeight);
+			});
+			
+		},
+		
+		showLess : function fn3(obj, newTxt, targetHeight){
+
+			$('.showLess').on('click', function(event){
+				event.preventDefault();
+				obj.animate({
+					height:targetHeight
+				},400);
+				obj.html(newTxt);
+				hideText.readMore(obj,newTxt, targetHeight);
+			});
+			
+		},
+
+	};
+	
+	hideText.setValues(el.$p, 2, true);
+
+});
+
+</script>
+    
+</body>
+</html>
